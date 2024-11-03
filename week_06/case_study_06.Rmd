@@ -1,7 +1,45 @@
 ---
 title: "Case Study 06"
-author: Your Name
-date: August 1, 2020
+author: Emily McCray
+date: October 10th, 2024
 output: github_document
 ---
- 
+
+#installing packages
+#install.packages("terra")
+#install.packages("ncdf4")
+
+#loading packages
+library(terra)
+library(spData)
+library(tidyverse)
+library(sf) 
+
+#downloading dataset
+library(ncdf4)
+download.file("https://crudata.uea.ac.uk/cru/data/temperature/absolute.nc","crudata.nc")
+
+# read in the data using the rast() function from the terra package
+tmean=rast("crudata.nc")
+
+#inspecting the data
+tmean
+plot(tmean) 
+View(tmean)
+
+#first max is to calc annual max for each pixel ; second one is max temp observed in each country overall? stack polygons?(which pixels go in each country and maximumn val of those; which pixels go with hottest month)
+
+#calculate the maximum temp by country 
+#max()
+#terra::extract(tmean, ?, fun = max)
+
+#identify the maximum temp observed in each country
+#terra:extract(), fun = max, na.rm=T, small=T
+
+#bind the original world dataset with the temp dataset
+
+#communicate results in ggplot 
+
+
+
+
