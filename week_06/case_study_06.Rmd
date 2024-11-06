@@ -1,45 +1,60 @@
 ---
-title: "Case Study 06"
+title: Case Study 06
 author: Emily McCray
 date: October 10th, 2024
 output: github_document
 ---
 
-#installing packages
-#install.packages("terra")
+#install packages
 #install.packages("ncdf4")
 
-#loading packages
+#load packages
 library(terra)
 library(spData)
 library(tidyverse)
 library(sf) 
-
-#downloading dataset
 library(ncdf4)
+library(knitr)
+library(kableExtra)
+
+#download the data
 download.file("https://crudata.uea.ac.uk/cru/data/temperature/absolute.nc","crudata.nc")
 
-# read in the data using the rast() function from the terra package
+#read in the data using code from the instructions 
 tmean=rast("crudata.nc")
 
-#inspecting the data
+#inspect the data
 tmean
 plot(tmean) 
-View(tmean)
 
-#first max is to calc annual max for each pixel ; second one is max temp observed in each country overall? stack polygons?(which pixels go in each country and maximumn val of those; which pixels go with hottest month)
-
-#calculate the maximum temp by country 
-#max()
-#terra::extract(tmean, ?, fun = max)
+#calculate the max value observed in each pixel across all months, then plot
+max_tmean <- max(tmean, c(1:12))
+plot(max_tmean)
 
 #identify the maximum temp observed in each country
-#terra:extract(), fun = max, na.rm=T, small=T
+temp <- terra::extract(max_tmean, world, fun = max, na.rm = T, small = T)
 
 #bind the original world dataset with the temp dataset
+world_clim <- bind_cols(world, temp)
 
-#communicate results in ggplot 
+#communicate the results in ggplot
+ggplot() +
+  geom_sf(data = world_clim, aes(fill = max)) +
+    scale_fill_viridis_c(name="Maximum\nTemperature (C)") +
+      theme(legend.position = 'bottom')
 
+#use dplyr to find the hottest country in each continent
+hottest_continents <- world_clim %>%
+  group_by(continent) %>%
+    slice_max(max) %>%
+      select(name_long, continent, max)
+      
+#create a summary table      
+hottest_continents %>%
+  knitr::kable() %>%
+    kable_styling() %>%
+      remove_column(4)
+  
 
 
 
