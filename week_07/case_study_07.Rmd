@@ -1,5 +1,5 @@
 ---
-title: Case Study 07
+title: "Case Study 07"
 author: Emily McCray
 date: November 5th, 2024
 output: github_document
