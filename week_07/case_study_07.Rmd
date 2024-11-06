@@ -1,7 +1,20 @@
 ---
 title: "Case Study 07"
 author: Emily McCray
-date: October 13th, 2024
+date: November 5th, 2024
 output: github_document
 ---
- 
+
+library(tidyverse)
+library(reprex)
+library(sf)
+library(spData)
+data(world)
+
+ggplot(world,aes(x=gdpPercap, y=continent, color=continent))+
+   geom_density(alpha=0.5,color=F)
+
+reprex(venue = "gh")
+
+
+   
