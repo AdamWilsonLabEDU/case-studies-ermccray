@@ -4,13 +4,13 @@ author: Emily McCray
 date: November 5th, 2024
 output: github_document
 ---
- 
+
 #installing new libraries
 #install.packages("ncdf4")
 #install.packages("rasterVis")
 #install.packages("ggmap")
 #install.packages("ggplot2")
-install.packages("terra")
+#install.packages("terra")
  
 #load in libraries 
 library(terra)
@@ -88,9 +88,10 @@ gplot(lulc)+
 plot(lst[[1:12]])
 
 scoff(lst)=cbind(0.02,-273.15)
-plot(lst[[1:10]])
+plot(lst[[1:10]]) 
 
-#part 1! :)
+
+#part 1! :D
 
 #defining a new sf point (code taken from instructions)
 lw= data.frame(x= -78.791547,y=43.007211) %>%   st_as_sf(coords=c("x","y"),crs=4326)
@@ -125,16 +126,56 @@ ggplot(lst_dates, aes(x = time, y = lst)) +
 #part 2! :)
 
 #summarizing the mean value per month 
-lst_month <- terra::tapp(lst, index = 'month', fun = mean, na.rm = TRUE)
+lst_month <- terra::tapp(lst, index = 'month', fun = mean, na.rm = T)
+names(lst_month)<-month.name[as.numeric(stringr::str_replace(names(lst_month),"m_",""))]
 
+print(lst_month["February"])
+
+print(lst_month[5])
 #setting layer names to months (code taken from instructions)
-names(lst_month)=month.name[as.numeric(str_replace(names(lst_month),"m_",""))]
+result <- lst_month![sapply(lst_month, is.null)]
+
+print(result)
+
+
+
+tm_shape(lst_month) +
+  tm_raster()
+  
+  nlyr(lst_month)
+  
+  plot(lst_month["February"])
+  p
 
 #plotting the map for each month 
-RasterVis::gplot()
+gplot() +
+  geom_tile() +
+    facet_wrap(~names(lst_month))
 
 #calculating the monthly mean for the entire image (code taken from instructions)
 global(lst_month,mean,na.rm=T)
 
 #part 3! :D
 
+#resample lulc to lst grid 
+#lulc2 <- resample(lulc, lst, method = near)
+
+#extract values from lst_month and lulc (code taken from instructions)
+lcds1=cbind.data.frame(
+values(lst_month),
+ID=values(lulc2[[1]]))%>%
+na.omit()
+
+#tidy the data (code taken from instructions)
+gather(key='month',value='value',-Land_Cover_Type_1_13)
+
+#convert ID to numeric
+#Use mutate(ID = as.numeric(Land_Cover_Type_1_13), month = factor(month, levels = month.name, ordered = TRUE)) to convert ID to numeric (e.g. ID=as.numeric(Land_Cover_Type_1_13) and month to an ordered factor with month=factor(month,levels=month.name,ordered=T).
+
+#filter the data
+#use filter() and landcover%in%c("Urban & built-up","Deciduous Broadleaf forest")
+
+#ggplot to illustrate monthly variability in lst between the two land cover types
+#ggplot([data])+
+#geom_point() +
+#facet_wrap(~landcover)
