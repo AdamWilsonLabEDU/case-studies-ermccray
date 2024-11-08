@@ -16,3 +16,4 @@
 .ppt
 .pptx
 tests/testthat/test-case_studies.R
+*data*

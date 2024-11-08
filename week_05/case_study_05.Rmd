@@ -1,7 +1,59 @@
 ---
 title: "Case Study 05"
-author: Your Name
-date: August 1, 2020
+author: Emily McCray
+date: October 1, 2024
 output: github_document
 ---
+
+#installing necessary packages
+#install.packages("sf")
+#install.packages("spData")
+
+#loading necessary packages
+library(spData)
+library(sf)
+library(tidyverse)
+library(units)
+
+#loading in the "world" and "us_states" datasets
+data(world)
+data(us_states)
+
+#plotting "world" and "us_states"
+plot(world[1])
+plot(us_states[1])
+
+#defining the albers equal area projection and storing as an object "albers" to use later
+albers <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+
+#filtering world data to only include canada
+world_canada <- world %>%
+  filter(name_long == "Canada")
+
+#buffering canada to 10km and storing as object "canada_buffered"
+canada_buffered <- st_buffer(world_canada, dist = 10000)
+
+#creating the final canada dataset by transforming the crs to equal the "albers" object
+canada_final <- canada_buffered %>%
+    st_transform(., crs = albers) 
+
+#filtering us_states to only include nys
+nys <- us_states %>%
+  filter(NAME == "New York") %>%
+      st_transform(., crs = albers) #transforming the crs to equal the "albers" object 
+
+#creating a "border" object of land in nys that insects the final buffered canada polygon 
+border <- st_intersection(canada_final, nys)
+
+#plotting the data
+ggplot() +
+  geom_sf(data = nys) + #adding a layer for nys
+    geom_sf(data = border, fill = "deeppink") + #adding a layer for the borders polygon and setting its fill color
+      ggtitle("New York Land within 10km of Canada") + #adding an informative title
+        theme_minimal() #adding a theme
+        
+#calculating the area of the border polygon
+st_area(border) %>% 
+  set_units(km^2) #setting the units to km^2
  
+

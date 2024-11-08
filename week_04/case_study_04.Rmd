@@ -1,22 +1,43 @@
 ---
 title: "Case Study 04"
-author: Your Name
-date: August 1, 2020
+author: Emily McCray
+date: October 13th, 2024
 output: github_document
 ---
 
-## First Header
+#loading in packages
+library(tidyverse)
+library(nycflights13)
 
-Comments
+#examined tables + their var names in the help tab for nycflights13
 
-```{r}
-summary(cars)
-```
+#distance from NY airports is in "flights"
+glimpse(flights)
 
-## Second Header
+#full airport names is in "airports"
+glimpse(airports)
 
-Comments
+#saving as an object "farthest_airport"
+farthest_airport <- flights %>% 
+  arrange(desc(distance)) %>% #arranging data by farthest distance from NY airports
+#viewing the data in the console shows that "HNL" is the code for the farthest airport
+    left_join(airports, c("dest" = "faa")) %>% #joining "airports" and "flights2" tables by dest/faa (airport codes)
+#viewing the data in the console again shows that "HNL" is code for Honolulu Intl
+        count(name) %>% #returning a count of airport names so each name only appears in one row
+          select(-n) %>% #dropping the count column (n) so we're only left with "name"
+            filter(name == "Honolulu Intl") %>% #filtering to retain only Honolulu Intl
+              as.character() #converting to a single character value
+                
+print(farthest_airport) #checking that this object returns Honolulu Intl
 
-```{r}
-plot(pressure)
-```
+
+
+
+
+
+
+
+
+
+
+
