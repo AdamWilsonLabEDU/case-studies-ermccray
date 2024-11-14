@@ -23,7 +23,7 @@ library(tidycensus)
 #below code taken from instructions: 
 #api key in order to obtain census data
 #REMOVE BEFORE PUSHING TO GITHUB
-census_api_key("c4793f3ede43099574a1dda58d49ac2d9075d696", install = TRUE, overwrite = TRUE)
+census_api_key("", install = TRUE, overwrite = TRUE)
 
 #registering parallel backend for the foreach package (telling computer how many cores to use?)
 registerDoParallel(4)
