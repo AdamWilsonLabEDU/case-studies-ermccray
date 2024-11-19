@@ -1,7 +1,71 @@
 ---
 title: "Case Study 11"
-author: Your Name
-date: August 1, 2020
+author: Emily McCray
+date: November 9, 2024
 output: github_document
 ---
- 
+
+#install new packages
+#install.packages("mapview")
+#install.packages("foreach")
+#install.packages("doParallel")
+#install.packages("tidycensus")
+
+#load libraries
+library(tidyverse)
+library(spData)
+library(sf)
+library(mapview)
+library(foreach)
+library(doParallel)
+library(tidycensus)
+
+#below code taken from instructions: 
+#api key in order to obtain census data
+#REMOVE BEFORE PUSHING TO GITHUB
+census_api_key("", install = TRUE, overwrite = TRUE)
+
+#registering parallel backend for the foreach package (telling computer how many cores to use?)
+registerDoParallel(4)
+#returns how many cores will be used?
+getDoParWorkers()
+
+#renaming race variables
+race_vars <- c(
+  "Total Population" = "P1_001N",
+  "White alone" = "P1_003N",
+  "Black or African American alone" = "P1_004N",
+  "American Indian and Alaska Native alone" = "P1_005N",
+  "Asian alone" = "P1_006N",
+  "Native Hawaiian and Other Pacific Islander alone" = "P1_007N",
+  "Some Other Race alone" = "P1_008N",
+  "Two or More Races" = "P1_009N"
+)
+
+#selecting criteria for the data/obtaining the data
+options(tigris_use_cache = TRUE)
+erie <- get_decennial(geography = "block", variables = race_vars, year=2020,
+                  state = "NY", county = "Erie County", geometry = TRUE,
+                  sumfile = "pl", ,cache_table=T) 
+
+#beginning to use my own code starting here: 
+#cropping the obtained census data using the given coords
+cropped_erie <- erie %>%
+  st_crop(c(xmin=-78.9,xmax=-78.85,ymin=42.888,ymax=42.92))
+
+#converting the "variable" column from the cropped data to a factor  
+cropped_erie$variable <- as.factor(cropped_erie$variable)
+
+#write a foreach loop for each race variable
+erie_loop <- foreach(i = cropped_erie$variable[1:8], .combine='rbind') %dopar% 
+
+  {cropped_erie %>% 
+    filter(variable == variable[i]) %>%
+    st_sample(., size=.$value, type = 'random') %>%  
+    st_as_sf() %>%
+    mutate(variable = i)
+  }
+    
+#make a leaflet map of the dataset; set the zcol to the racial identity of each point
+#"stroke = FALSE and legend = TRUE" added after listening to the case study leadership presentation (could not figure out how to get rid of the black outline for each of the dots on my own)
+mapview(erie_loop, zcol = "variable", cex = 1, alpha = 0.5, stroke = FALSE, legend = TRUE)

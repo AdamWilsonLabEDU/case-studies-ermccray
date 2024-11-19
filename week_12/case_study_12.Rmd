@@ -1,7 +1,51 @@
 ---
 title: "Case Study 12"
-author: Your Name
-date: August 1, 2020
+author: Emily McCray
+date: November 19, 2024
 output: github_document
 ---
- 
+
+#install new packages
+#install.packages("widgetframe")
+#install.packages("openmeteo")
+
+#load libraries
+library(tidyverse)
+library(htmlwidgets)
+library(widgetframe)
+library(xts)
+library(dygraphs)
+library(openmeteo)
+
+#download data
+d<- weather_history(c(43.00923265935055, -78.78494250958327),start = "2023-01-01",end=today(),
+                  daily=list("temperature_2m_max","temperature_2m_min","precipitation_sum")) %>% 
+  mutate(daily_temperature_2m_mean=(daily_temperature_2m_max+daily_temperature_2m_min)/2) %>%
+
+#creating objects for each of the graphs that i want to plot
+graph1 <- d %>% 
+  select(date, daily_temperature_2m_max, daily_temperature_2m_min, daily_temperature_2m_mean)
+
+graph2 <- d %>%
+  select(date, daily_precipitation_sum)
+
+#converting both objects into a time series object 
+graph1_xts <- xts(x = graph1, order.by = d$date)
+
+graph2_xts <- xts(x = graph2, order.by = d$date)
+
+#creating dygraphs for temperature and precipitation
+buffalo_weather <- list(
+dygraph(graph1_xts, main = "Daily Maximum Temperature in Buffalo, NY", group = "buffalo_weather") %>%
+  dySeries(c("daily_temperature_2m_min", "daily_temperature_2m_mean", "daily_temperature_2m_max"), label = "mean") %>%
+    dyRangeSelector(dateWindow = c("2023-01-01", "2024-10-31")) %>% 
+      dyOptions(colors = "deeppink"), 
+  
+dygraph(graph2_xts, main = "Daily Precipitation in Buffal, NY", group = "buffalo_weather") %>%
+  dySeries("daily_precipitation_sum", label = "precipitation")%>%
+    dyRangeSelector(dateWindow = c("2023-01-01", "2024-10-31")) %>% 
+    dyOptions(colors = "deeppink")
+)
+
+#synchronizing the dygraphs and outputting with htmltools  
+htmltools::browsable(htmltools::tagList(buffalo_weather))
